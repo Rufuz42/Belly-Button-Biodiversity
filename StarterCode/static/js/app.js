@@ -28,6 +28,9 @@ function initializeDB()
 
         // Call the function to build the chart chart
         buildBarChart(firstSampleID);
+
+        // Call the function to build the bubble chart
+        buildBubbleChart(firstSampleID);
     });
 
 }
@@ -44,6 +47,9 @@ function optionChanged(item)
 
     // Call the function to build the bar chart
     buildBarChart(item);
+
+    // Call the function to build the bubble chart
+    buildBubbleChart(item);
 }
 
 
@@ -128,14 +134,57 @@ function buildBarChart(sampleID)
         };
 
         Plotly.newPlot('bar', [barChart], layout);
+    });
+}
 
-        // // Clear the existing data out before repopulating the table
-        // d3.select('#sample-metadata').html('');
+// Function to build the Bubble chart
+function buildBubbleChart(sampleID)
+{
+    // console.log(sampleID);
+    // let data = d3.json('samples.json');
+    // console.log(data);
 
-        // // extract the value-key pairs to the chart
-        // Object.entries(resultData).forEach(([key, value]) => {
-        //     d3.select('#sample-metadata').append('h5').text(`${key}: ${value}`)
-        // });
+    d3.json('samples.json').then((data) => {
 
+        // grabs the sample data
+        let sampleData = data.samples;
+        // console.log(sampleData);
+
+        // filter based on the value of the sampleID, returns array
+        let resultID = sampleData.filter(sampleIDResult => sampleIDResult.id == sampleID);
+        // console.log(resultID);
+
+        // get just index 0 from the array, returns object
+        let resultData = resultID[0];
+        // console.log(resultData);
+
+        // Get the otu_ids, labels, and sample_values values
+        let otu_ids = resultData.otu_ids;
+        let otu_labels = resultData.otu_labels;
+        let sample_values = resultData.sample_values;
+        // console.log(otu_ids);
+        // console.log(otu_labels);
+        // console.log(sample_values);
+
+        // Build out the bubble chart
+        let bubbleChart = {
+            y: sample_values, 
+            x: otu_ids,
+            text: otu_labels,
+            mode: 'markers',
+            marker: {
+                size: sample_values,
+                color: otu_ids,
+                colorscale: "Earth"
+            }
+        }
+
+        let layout = {
+            title: "Bacteria Cultures Per Sample",
+            hovermode: 'closest',
+            xaxis: {title: 'OTU ID'}
+        };
+
+        Plotly.newPlot('bubble', [bubbleChart], layout);
     });
 }
